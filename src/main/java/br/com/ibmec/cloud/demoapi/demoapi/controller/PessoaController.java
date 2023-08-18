@@ -22,28 +22,43 @@ import br.com.ibmec.cloud.demoapi.demoapi.model.Pessoa;
 @RequestMapping("/pessoa")
 public class PessoaController {
 
+    private static ArrayList<Pessoa> Pessoas = new ArrayList<>();
+
     @GetMapping
     public ResponseEntity<List<Pessoa>> getAll() {
         try {
-            List<Pessoa> items = new ArrayList<Pessoa>();
-            
-            Pessoa pessoa1 = new Pessoa();
-            pessoa1.setId(1);
-            pessoa1.setNome("Rafael Cruz");
-            pessoa1.setCpf("12345678900");
-
-            items.add(pessoa1);
-
-            Pessoa pessoa2 = new Pessoa();
-            pessoa2.setId(2);
-            pessoa2.setNome("João da Silva");
-            pessoa2.setCpf("2165498700");
-
-            items.add(pessoa2);
-
-            return new ResponseEntity<>(items, HttpStatus.OK);
+            return new ResponseEntity<>(Pessoas, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<Pessoa> create(@RequestBody Pessoa item) {
+        try {
+            Pessoas.add(item);
+            return new ResponseEntity<>(item, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<Pessoa> getById(@PathVariable("id") Integer id) {
+        
+        Pessoa result = null;
+
+        for (Pessoa item : Pessoas) {
+            if (item.getId() == id) {
+                result = item;
+                break;
+            }
+        }
+
+        if (result != null) {
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
