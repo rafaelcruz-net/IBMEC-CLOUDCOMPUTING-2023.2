@@ -45,7 +45,7 @@ public class PessoaController {
 
     @GetMapping("{id}")
     public ResponseEntity<Pessoa> getById(@PathVariable("id") Integer id) {
-        
+
         Pessoa result = null;
 
         for (Pessoa item : Pessoas) {
@@ -59,6 +59,55 @@ public class PessoaController {
             return new ResponseEntity<>(result, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<Pessoa> update(@PathVariable("id") Integer id, @RequestBody Pessoa pessoaNovosDados) {
+
+        Pessoa pessoaASerAtualizada = null;
+
+        for (Pessoa item : Pessoas) {
+            if (item.getId() == id) {
+                pessoaASerAtualizada = item;
+                break;
+            }
+        }
+
+        // Não achei a pessoa a ser atualizada
+        if (pessoaASerAtualizada == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        pessoaASerAtualizada.setNome(pessoaNovosDados.getNome());
+        pessoaASerAtualizada.setCpf(pessoaNovosDados.getCpf());
+
+        return new ResponseEntity<>(pessoaASerAtualizada, HttpStatus.OK);
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<HttpStatus> delete(@PathVariable("id") Integer id) {
+        try {
+
+            Pessoa pessoaASerExcluida = null;
+
+            for (Pessoa item : Pessoas) {
+                if (item.getId() == id) {
+                    pessoaASerExcluida = item;
+                    break;
+                }
+            }
+
+            // Não achei a pessoa a ser excluida
+            if (pessoaASerExcluida == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            Pessoas.remove(pessoaASerExcluida);
+
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
         }
     }
 
