@@ -1,8 +1,25 @@
 package br.com.ibmec.cloud.demoapi.demoapi.model;
 
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "pessoas")
 public class Pessoa {
-    private Integer id;
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @Column(nullable = false)
     private String nome;
+
+    @Column(nullable = true)
     private String cpf;
     
     public String getCpf() {
@@ -21,11 +38,11 @@ public class Pessoa {
         this.nome = nome;
     }
 
-    public Integer getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(long id) {
         this.id = id;
     }
 }
