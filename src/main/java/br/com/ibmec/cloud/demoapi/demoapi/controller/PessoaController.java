@@ -17,17 +17,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.ibmec.cloud.demoapi.demoapi.model.Pessoa;
+import br.com.ibmec.cloud.demoapi.demoapi.repository.PessoaRepository;
 
 @RestController
 @RequestMapping("/pessoa")
 public class PessoaController {
 
-    private static ArrayList<Pessoa> Pessoas = new ArrayList<>();
+    @Autowired
+    private PessoaRepository _pessoaRepository;
 
     @GetMapping
     public ResponseEntity<List<Pessoa>> getAll() {
         try {
-            return new ResponseEntity<>(Pessoas, HttpStatus.OK);
+            return new ResponseEntity<>(this._pessoaRepository.findAll(), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -36,74 +38,56 @@ public class PessoaController {
     @PostMapping
     public ResponseEntity<Pessoa> create(@RequestBody Pessoa item) {
         try {
-            Pessoas.add(item);
-            return new ResponseEntity<>(item, HttpStatus.CREATED);
+            Pessoa result = this._pessoaRepository.save(item);
+            return new ResponseEntity<>(result, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
         }
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Pessoa> getById(@PathVariable("id") Integer id) {
+    public ResponseEntity<Pessoa> getById(@PathVariable("id") long id) {
 
-        Pessoa result = null;
+        Optional<Pessoa> result = this._pessoaRepository.findById(id);
 
-        for (Pessoa item : Pessoas) {
-            if (item.getId() == id) {
-                result = item;
-                break;
-            }
-        }
-
-        if (result != null) {
-            return new ResponseEntity<>(result, HttpStatus.OK);
+        if (result.isPresent()) {
+            return new ResponseEntity<>(result.get(), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Pessoa> update(@PathVariable("id") Integer id, @RequestBody Pessoa pessoaNovosDados) {
+    public ResponseEntity<Pessoa> update(@PathVariable("id") long id, @RequestBody Pessoa pessoaNovosDados) {
 
-        Pessoa pessoaASerAtualizada = null;
-
-        for (Pessoa item : Pessoas) {
-            if (item.getId() == id) {
-                pessoaASerAtualizada = item;
-                break;
-            }
-        }
+        Optional<Pessoa> result = this._pessoaRepository.findById(id);
 
         // Não achei a pessoa a ser atualizada
-        if (pessoaASerAtualizada == null) {
+        if (result.isPresent() == false) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
+        Pessoa pessoaASerAtualizada = result.get();
         pessoaASerAtualizada.setNome(pessoaNovosDados.getNome());
         pessoaASerAtualizada.setCpf(pessoaNovosDados.getCpf());
+
+        this._pessoaRepository.save(pessoaASerAtualizada);
 
         return new ResponseEntity<>(pessoaASerAtualizada, HttpStatus.OK);
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<HttpStatus> delete(@PathVariable("id") Integer id) {
+    public ResponseEntity<HttpStatus> delete(@PathVariable("id") long id) {
         try {
 
-            Pessoa pessoaASerExcluida = null;
-
-            for (Pessoa item : Pessoas) {
-                if (item.getId() == id) {
-                    pessoaASerExcluida = item;
-                    break;
-                }
-            }
+            Optional<Pessoa> pessoaASerExcluida = this._pessoaRepository.findById(id);
 
             // Não achei a pessoa a ser excluida
-            if (pessoaASerExcluida == null) {
+            if (pessoaASerExcluida.isPresent() == false) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
-            Pessoas.remove(pessoaASerExcluida);
+            this._pessoaRepository.delete(pessoaASerExcluida.get());
 
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
