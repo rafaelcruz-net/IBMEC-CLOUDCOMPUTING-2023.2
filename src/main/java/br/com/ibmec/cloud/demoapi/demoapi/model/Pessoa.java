@@ -21,7 +21,7 @@ public class Pessoa {
 
     @Column(nullable = true)
     private String cpf;
-    
+
     public String getCpf() {
         return cpf;
     }

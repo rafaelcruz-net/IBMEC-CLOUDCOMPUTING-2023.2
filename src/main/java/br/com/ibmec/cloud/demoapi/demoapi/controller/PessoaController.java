@@ -94,5 +94,4 @@ public class PessoaController {
             return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
         }
     }
-
 }
