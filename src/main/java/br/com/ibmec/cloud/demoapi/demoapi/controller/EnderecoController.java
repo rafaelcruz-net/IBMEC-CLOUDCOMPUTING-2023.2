@@ -20,9 +20,11 @@ import br.com.ibmec.cloud.demoapi.demoapi.model.Endereco;
 import br.com.ibmec.cloud.demoapi.demoapi.model.Pessoa;
 import br.com.ibmec.cloud.demoapi.demoapi.repository.EnderecoRepository;
 import br.com.ibmec.cloud.demoapi.demoapi.repository.PessoaRepository;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/endereco")
+@Tag(name = "Endereco", description = "")
 class EnderecoController {
 
     @Autowired

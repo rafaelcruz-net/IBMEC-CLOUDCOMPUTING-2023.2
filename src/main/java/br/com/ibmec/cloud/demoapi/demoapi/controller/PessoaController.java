@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.ibmec.cloud.demoapi.demoapi.model.Pessoa;
 import br.com.ibmec.cloud.demoapi.demoapi.repository.PessoaRepository;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/pessoa")
+@Tag(name = "Pessoa", description = "")
 public class PessoaController {
 
     @Autowired
