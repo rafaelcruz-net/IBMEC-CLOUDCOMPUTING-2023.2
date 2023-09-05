@@ -20,6 +20,7 @@ import br.com.ibmec.cloud.demoapi.demoapi.model.Endereco;
 import br.com.ibmec.cloud.demoapi.demoapi.model.Pessoa;
 import br.com.ibmec.cloud.demoapi.demoapi.repository.EnderecoRepository;
 import br.com.ibmec.cloud.demoapi.demoapi.repository.PessoaRepository;
+import br.com.ibmec.cloud.demoapi.demoapi.service.EnderecoService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
@@ -28,22 +29,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 class EnderecoController {
 
     @Autowired
-    EnderecoRepository enderecoRepository;
-
-    @Autowired
-    PessoaRepository pessoaRepository;
+    EnderecoService enderecoService;
 
     @GetMapping
     public ResponseEntity<List<Endereco>> getAll() {
         try {
-            List<Endereco> items = new ArrayList<Endereco>();
-
-            enderecoRepository.findAll().forEach(items::add);
-
-            if (items.isEmpty())
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
-            return new ResponseEntity<>(items, HttpStatus.OK);
+            return new ResponseEntity<>(enderecoService.findAll(), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -51,7 +42,7 @@ class EnderecoController {
 
     @GetMapping("{id}")
     public ResponseEntity<Endereco> getById(@PathVariable("id") Long id) {
-        Optional<Endereco> existingItemOptional = enderecoRepository.findById(id);
+        Optional<Endereco> existingItemOptional = enderecoService.findById(id);
 
         if (existingItemOptional.isPresent()) {
             return new ResponseEntity<>(existingItemOptional.get(), HttpStatus.OK);
@@ -63,16 +54,8 @@ class EnderecoController {
     @PostMapping("{idPessoa}")
     public ResponseEntity<Endereco> create(@PathVariable("idPessoa") long idPessoa, @RequestBody Endereco endereco) {
         try {
-
-            Optional<Pessoa> pessoa = pessoaRepository.findById(idPessoa);
-
-            if (pessoa.isPresent() == false)
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-
-            pessoa.get().addEndereco(endereco);
-            this.pessoaRepository.save(pessoa.get());
-
-            return new ResponseEntity<>(endereco, HttpStatus.CREATED);
+            Endereco result = this.enderecoService.create(idPessoa, endereco);
+            return new ResponseEntity<>(result, HttpStatus.CREATED);
             
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
@@ -81,30 +64,18 @@ class EnderecoController {
 
     @PutMapping("{id}")
     public ResponseEntity<Endereco> update(@PathVariable("id") Long id, @RequestBody Endereco endereco) {
-
-        Optional<Endereco> existingItemOptional = enderecoRepository.findById(id);
-
-        if (existingItemOptional.isPresent() == false)
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-        Endereco existingItem = existingItemOptional.get();
-        
-        existingItem.setLogradouro(endereco.getLogradouro());
-        existingItem.setCep(endereco.getCep());
-        existingItem.setCidade(endereco.getCidade());
-        existingItem.setComplemento(endereco.getComplemento());
-        existingItem.setEstado(endereco.getEstado());
-
-        enderecoRepository.save(existingItem);
-
-        return new ResponseEntity<>(existingItem, HttpStatus.OK);
-
+        try {
+            Endereco result = this.enderecoService.update(id, endereco);    
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
+        }
     }
 
     @DeleteMapping("{id}")
     public ResponseEntity<HttpStatus> delete(@PathVariable("id") Long id) {
         try {
-            enderecoRepository.deleteById(id);
+            this.enderecoService.delete(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);

@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 import br.com.ibmec.cloud.demoapi.demoapi.model.Pessoa;
 
 @Repository
-public interface PessoaRepository extends JpaRepository<Pessoa, Long> {}
+public interface PessoaRepository extends JpaRepository<Pessoa, Long> {
+    long countByCpf(String cpf);
+}

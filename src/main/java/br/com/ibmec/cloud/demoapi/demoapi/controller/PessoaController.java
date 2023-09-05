@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.ibmec.cloud.demoapi.demoapi.model.Pessoa;
-import br.com.ibmec.cloud.demoapi.demoapi.repository.PessoaRepository;
+import br.com.ibmec.cloud.demoapi.demoapi.service.PessoaService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
@@ -26,12 +26,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class PessoaController {
 
     @Autowired
-    private PessoaRepository _pessoaRepository;
+    private PessoaService _pessoaService;
 
     @GetMapping
     public ResponseEntity<List<Pessoa>> getAll() {
         try {
-            return new ResponseEntity<>(this._pessoaRepository.findAll(), HttpStatus.OK);
+            return new ResponseEntity<>(this._pessoaService.findAll(), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -40,57 +40,40 @@ public class PessoaController {
     @PostMapping
     public ResponseEntity<Pessoa> create(@RequestBody Pessoa item) {
         try {
-            Pessoa result = this._pessoaRepository.save(item);
+            Pessoa result = this._pessoaService.save(item);
             return new ResponseEntity<>(result, HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
+            return new ResponseEntity<>(null, HttpStatus.UNPROCESSABLE_ENTITY);
         }
     }
 
     @GetMapping("{id}")
     public ResponseEntity<Pessoa> getById(@PathVariable("id") long id) {
 
-        Optional<Pessoa> result = this._pessoaRepository.findById(id);
+        Optional<Pessoa> result = this._pessoaService.findById(id);
 
         if (result.isPresent()) {
             return new ResponseEntity<>(result.get(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        } 
+            
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        
     }
 
     @PutMapping("{id}")
     public ResponseEntity<Pessoa> update(@PathVariable("id") long id, @RequestBody Pessoa pessoaNovosDados) {
-
-        Optional<Pessoa> result = this._pessoaRepository.findById(id);
-
-        // Não achei a pessoa a ser atualizada
-        if (result.isPresent() == false) {
+        try {
+            Pessoa result = this._pessoaService.update(id, pessoaNovosDados);
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        } catch (Exception ex) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
-        Pessoa pessoaASerAtualizada = result.get();
-        pessoaASerAtualizada.setNome(pessoaNovosDados.getNome());
-        pessoaASerAtualizada.setCpf(pessoaNovosDados.getCpf());
-
-        this._pessoaRepository.save(pessoaASerAtualizada);
-
-        return new ResponseEntity<>(pessoaASerAtualizada, HttpStatus.OK);
     }
 
     @DeleteMapping("{id}")
     public ResponseEntity<HttpStatus> delete(@PathVariable("id") long id) {
         try {
-
-            Optional<Pessoa> pessoaASerExcluida = this._pessoaRepository.findById(id);
-
-            // Não achei a pessoa a ser excluida
-            if (pessoaASerExcluida.isPresent() == false) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-
-            this._pessoaRepository.delete(pessoaASerExcluida.get());
-
+            this._pessoaService.delete(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
