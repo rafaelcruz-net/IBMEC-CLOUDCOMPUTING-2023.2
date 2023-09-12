@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.ibmec.cloud.demoapi.demoapi.model.Pessoa;
 import br.com.ibmec.cloud.demoapi.demoapi.service.PessoaService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/pessoa")
@@ -38,7 +39,7 @@ public class PessoaController {
     }
 
     @PostMapping
-    public ResponseEntity<Pessoa> create(@RequestBody Pessoa item) {
+    public ResponseEntity<Pessoa> create(@Valid @RequestBody Pessoa item) {
         try {
             Pessoa result = this._pessoaService.save(item);
             return new ResponseEntity<>(result, HttpStatus.CREATED);
